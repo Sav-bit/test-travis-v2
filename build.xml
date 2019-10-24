@@ -1,188 +1,57 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="travis" default="all">
-  
-  
-  <property file="build.properties"/>
-  <!-- Uncomment the following property if no tests compilation is needed -->
-  <!-- 
-  <property name="skip.tests" value="true"/>
-   -->
-  
-  <!-- Compiler options -->
-  
-  <property name="compiler.debug" value="on"/>
-  <property name="compiler.generate.no.warnings" value="off"/>
-  <property name="compiler.args" value=""/>
-  <property name="compiler.max.memory" value="700m"/>
-  <patternset id="ignored.files">
-    <exclude name="**/*.hprof/**"/>
-    <exclude name="**/*.pyc/**"/>
-    <exclude name="**/*.pyo/**"/>
-    <exclude name="**/*.rbc/**"/>
-    <exclude name="**/*.yarb/**"/>
-    <exclude name="**/*~/**"/>
-    <exclude name="**/.DS_Store/**"/>
-    <exclude name="**/.git/**"/>
-    <exclude name="**/.hg/**"/>
-    <exclude name="**/.svn/**"/>
-    <exclude name="**/CVS/**"/>
-    <exclude name="**/__pycache__/**"/>
-    <exclude name="**/_svn/**"/>
-    <exclude name="**/vssver.scc/**"/>
-    <exclude name="**/vssver2.scc/**"/>
-  </patternset>
-  <patternset id="library.patterns">
-    <include name="*.war"/>
-    <include name="*.swc"/>
-    <include name="*.zip"/>
-    <include name="*.egg"/>
-    <include name="*.ear"/>
-    <include name="*.ane"/>
-    <include name="*.jar"/>
-    <include name="*.klib"/>
-  </patternset>
-  <patternset id="compiler.resources">
-    <exclude name="**/?*.java"/>
-    <exclude name="**/?*.form"/>
-    <exclude name="**/?*.class"/>
-    <exclude name="**/?*.groovy"/>
-    <exclude name="**/?*.scala"/>
-    <exclude name="**/?*.flex"/>
-    <exclude name="**/?*.kt"/>
-    <exclude name="**/?*.clj"/>
-    <exclude name="**/?*.aj"/>
-  </patternset>
-  
-  <!-- JDK definitions -->
-  
-  <property name="jdk.bin.1.8" value="${jdk.home.1.8}/bin"/>
-  <path id="jdk.classpath.1.8">
-    <fileset dir="${jdk.home.1.8}">
-      <include name="jre/lib/charsets.jar"/>
-      <include name="jre/lib/ext/cldrdata.jar"/>
-      <include name="jre/lib/ext/dnsns.jar"/>
-      <include name="jre/lib/ext/jaccess.jar"/>
-      <include name="jre/lib/ext/localedata.jar"/>
-      <include name="jre/lib/ext/nashorn.jar"/>
-      <include name="jre/lib/ext/sunec.jar"/>
-      <include name="jre/lib/ext/sunjce_provider.jar"/>
-      <include name="jre/lib/ext/sunpkcs11.jar"/>
-      <include name="jre/lib/ext/zipfs.jar"/>
-      <include name="jre/lib/jce.jar"/>
-      <include name="jre/lib/jsse.jar"/>
-      <include name="jre/lib/management-agent.jar"/>
-      <include name="jre/lib/resources.jar"/>
-      <include name="jre/lib/rt.jar"/>
-    </fileset>
-  </path>
-  
-  <property name="project.jdk.home" value="${jdk.home.1.8}"/>
-  <property name="project.jdk.bin" value="${jdk.bin.1.8}"/>
-  <property name="project.jdk.classpath" value="jdk.classpath.1.8"/>
-  <!-- Register Custom Compiler Taskdefs -->
-  <property name="javac2.home" value="${idea.home}/lib"/>
-  <path id="javac2.classpath">
-    <fileset dir="${javac2.home}">
-      <include name="javac2.jar"/>
-      <include name="jdom.jar"/>
-      <include name="asm-all*.jar"/>
-      <include name="forms-*.jar"/>
-    </fileset>
-  </path>
-  <target name="register.custom.compilers">
-    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
-  </target>
-  
-  <!-- Modules -->
-  
-  
-  <!-- Module travis -->
-  
-  <dirname property="module.travis.basedir" file="${ant.file}"/>
-  
-  
-  <property name="module.jdk.home.travis" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.travis" value="${project.jdk.bin}"/>
-  <property name="module.jdk.classpath.travis" value="${project.jdk.classpath}"/>
-  
-  <property name="compiler.args.travis" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
-  
-  <property name="travis.output.dir" value="${module.travis.basedir}/out/production/travis"/>
-  <property name="travis.testoutput.dir" value="${module.travis.basedir}/out/test/travis"/>
-  
-  <path id="travis.module.bootclasspath">
-    <!-- Paths to be included in compilation bootclasspath -->
-  </path>
-  
-  <path id="travis.module.production.classpath">
-    <path refid="${module.jdk.classpath.travis}"/>
-  </path>
-  
-  <path id="travis.runtime.production.module.classpath">
-    <pathelement location="${travis.output.dir}"/>
-  </path>
-  
-  <path id="travis.module.classpath">
-    <path refid="${module.jdk.classpath.travis}"/>
-    <pathelement location="${travis.output.dir}"/>
-  </path>
-  
-  <path id="travis.runtime.module.classpath">
-    <pathelement location="${travis.testoutput.dir}"/>
-    <pathelement location="${travis.output.dir}"/>
-  </path>
-  
-  
-  <patternset id="excluded.from.module.travis">
-    <patternset refid="ignored.files"/>
-  </patternset>
-  
-  <patternset id="excluded.from.compilation.travis">
-    <patternset refid="excluded.from.module.travis"/>
-  </patternset>
-  
-  <path id="travis.module.sourcepath">
-    <dirset dir="${module.travis.basedir}">
-      <include name="src"/>
-    </dirset>
-  </path>
-  
-  
-  <target name="compile.module.travis" depends="compile.module.travis.production,compile.module.travis.tests" description="Compile module travis"/>
-  
-  <target name="compile.module.travis.production" depends="register.custom.compilers" description="Compile module travis; production classes">
-    <mkdir dir="${travis.output.dir}"/>
-    <javac2 destdir="${travis.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.travis}/javac">
-      <compilerarg line="${compiler.args.travis}"/>
-      <bootclasspath refid="travis.module.bootclasspath"/>
-      <classpath refid="travis.module.production.classpath"/>
-      <src refid="travis.module.sourcepath"/>
-      <patternset refid="excluded.from.compilation.travis"/>
-    </javac2>
-    
-    <copy todir="${travis.output.dir}">
-      <fileset dir="${module.travis.basedir}/src">
-        <patternset refid="compiler.resources"/>
-        <type type="file"/>
-      </fileset>
-    </copy>
-  </target>
-  
-  <target name="compile.module.travis.tests" depends="register.custom.compilers,compile.module.travis.production" description="compile module travis; test classes" unless="skip.tests"/>
-  
-  <target name="clean.module.travis" description="cleanup module">
-    <delete dir="${travis.output.dir}"/>
-    <delete dir="${travis.testoutput.dir}"/>
-  </target>
-  
-  <target name="init" description="Build initialization">
-    <!-- Perform any build initialization in this target -->
-  </target>
-  
-  <target name="clean" depends="clean.module.travis" description="cleanup all"/>
-  
-  <target name="build.modules" depends="init, clean, compile.module.travis" description="build all modules"/>
-  
-  <target name="all" depends="build.modules" description="build all"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="Hello_Worold">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="12"/>
+    <property name="source" value="12"/>
+    <path id="Hello_Worold.classpath">
+        <pathelement location="bin"/>
+    </path>
+    <path id="run.Helloworld.classpath">
+        <path refid="Hello_Worold.classpath"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="Hello_Worold.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="Helloworld">
+        <java classname="Helloworld" failonerror="true" fork="yes">
+            <classpath refid="run.Helloworld.classpath"/>
+        </java>
+    </target>
 </project>
