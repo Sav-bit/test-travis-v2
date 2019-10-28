@@ -2,10 +2,10 @@ language: java
 jdk:
 - openjdk8
 addons:
-sonarcloud:
-organization: "sav-bit"
-token:
-secure: "4ecc8bf25a3350b066f31bce61eb2dc8e7bc0bd4"
+ sonarcloud:
+ organization: "sav-bit"
+ token:
+  secure: "4ecc8bf25a3350b066f31bce61eb2dc8e7bc0bd4"
 script:
 - ant build
 - sonar-scanner
